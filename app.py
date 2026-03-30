@@ -24,10 +24,17 @@ model = genai.GenerativeModel(
 def stream_gemini(prompt: str) -> Response:
     """Stream a Gemini response as Server-Sent Events."""
     def generate():
-        response = model.generate_content(prompt, stream=True)
-        for chunk in response:
-            if chunk.text:
-                yield f"data: {json.dumps({'text': chunk.text})}\n\n"
+        try:
+            response = model.generate_content(prompt, stream=True)
+            for chunk in response:
+                try:
+                    text = chunk.text
+                    if text:
+                        yield f"data: {json.dumps({'text': text})}\n\n"
+                except Exception:
+                    pass
+        except Exception as e:
+            yield f"data: {json.dumps({'text': f'**Error:** {str(e)}'})}\n\n"
         yield "data: [DONE]\n\n"
 
     return Response(
