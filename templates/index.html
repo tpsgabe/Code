@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maverix PE — AI Deal Sourcing</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">M</div>
+      <div class="logo-text">
+        <span class="logo-name">Maverix</span>
+        <span class="logo-sub">Private Equity</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-tab="digest">
+        <span class="nav-icon">☀️</span>
+        Morning Digest
+      </button>
+      <button class="nav-item" data-tab="company">
+        <span class="nav-icon">🏢</span>
+        Company Research
+      </button>
+      <button class="nav-item" data-tab="quick-screen">
+        <span class="nav-icon">⚡</span>
+        Quick Screen
+      </button>
+      <button class="nav-item" data-tab="industries">
+        <span class="nav-icon">📈</span>
+        Emerging Industries
+      </button>
+      <button class="nav-item" data-tab="ma">
+        <span class="nav-icon">🤝</span>
+        M&amp;A Tracker
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="api-status" id="api-status">
+        <span class="status-dot"></span>
+        <span class="status-label">Claude Connected</span>
+      </div>
+      <p class="sidebar-disclaimer">Powered by Claude Opus 4.6</p>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- Header -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="page-title">Morning Digest</h1>
+        <p class="page-subtitle" id="page-subtitle">Your daily deal sourcing briefing</p>
+      </div>
+      <div class="topbar-right">
+        <span class="badge">Toronto Growth Equity · Tech Focus</span>
+      </div>
+    </header>
+
+    <!-- Tab panels -->
+    <div class="content">
+
+      <!-- MORNING DIGEST TAB -->
+      <section class="tab-panel active" id="tab-digest">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>Generate Morning Digest</h2>
+            <p>Get a comprehensive deal sourcing briefing to start your day.</p>
+          </div>
+          <div class="form-row">
+            <label for="digest-date">Date</label>
+            <input type="text" id="digest-date" placeholder="e.g. Monday, March 30, 2026" />
+          </div>
+          <button class="btn btn-primary" id="btn-digest">
+            <span class="btn-icon">☀️</span> Generate Digest
+          </button>
+        </div>
+        <div class="result-card hidden" id="result-digest">
+          <div class="result-header">
+            <h3>Morning Digest</h3>
+            <button class="btn-copy" onclick="copyResult('result-digest')">Copy</button>
+          </div>
+          <div class="result-body markdown-output" id="output-digest"></div>
+        </div>
+      </section>
+
+      <!-- COMPANY RESEARCH TAB -->
+      <section class="tab-panel" id="tab-company">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>Company Research</h2>
+            <p>Paste a company profile from PitchBook, Capital IQ, or any source. Claude will extract key investment signals.</p>
+          </div>
+          <div class="form-row">
+            <label for="company-info">Company Profile / Description</label>
+            <textarea
+              id="company-info"
+              rows="10"
+              placeholder="Paste company description, funding history, financials, or any available information here...
+
+Example: 'Acme SaaS Inc. is a Toronto-based B2B software company founded in 2019. They provide AI-powered workflow automation for mid-market financial services firms. Revenue: $8M ARR, growing 85% YoY. Last raised $12M Series A in 2023 led by BDC Capital. Team of 45. Customers include TD Bank, Manulife...'"></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-company">
+            <span class="btn-icon">🏢</span> Analyze Company
+          </button>
+        </div>
+        <div class="result-card hidden" id="result-company">
+          <div class="result-header">
+            <h3>Company Analysis</h3>
+            <button class="btn-copy" onclick="copyResult('result-company')">Copy</button>
+          </div>
+          <div class="result-body markdown-output" id="output-company"></div>
+        </div>
+      </section>
+
+      <!-- QUICK SCREEN TAB -->
+      <section class="tab-panel" id="tab-quick-screen">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>Quick Screen</h2>
+            <p>Rapidly assess a company name for Maverix fit — get a pass/fail in seconds.</p>
+          </div>
+          <div class="form-row">
+            <label for="screen-name">Company Name</label>
+            <input type="text" id="screen-name" placeholder="e.g. Clearco, Wealthsimple, Tulip Retail" />
+          </div>
+          <div class="form-row">
+            <label for="screen-desc">Brief Description (optional)</label>
+            <textarea id="screen-desc" rows="3" placeholder="Optional: add any context you have about the company..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="btn-screen">
+            <span class="btn-icon">⚡</span> Quick Screen
+          </button>
+        </div>
+        <div class="result-card hidden" id="result-screen">
+          <div class="result-header">
+            <h3>Screening Result</h3>
+            <button class="btn-copy" onclick="copyResult('result-screen')">Copy</button>
+          </div>
+          <div class="result-body markdown-output" id="output-screen"></div>
+        </div>
+      </section>
+
+      <!-- EMERGING INDUSTRIES TAB -->
+      <section class="tab-panel" id="tab-industries">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>Emerging Industries</h2>
+            <p>Identify high-momentum sectors based on recent investment trends and market activity.</p>
+          </div>
+          <div class="form-row">
+            <label for="industry-sectors">Sectors to Focus On (optional)</label>
+            <input type="text" id="industry-sectors" placeholder="e.g. AI/ML, Fintech, HealthTech, CleanTech — leave blank for all" />
+          </div>
+          <div class="form-row">
+            <label for="industry-timeframe">Timeframe</label>
+            <input type="text" id="industry-timeframe" placeholder="e.g. Q1 2026, H1 2026" value="Q1 2026" />
+          </div>
+          <button class="btn btn-primary" id="btn-industries">
+            <span class="btn-icon">📈</span> Analyze Trends
+          </button>
+        </div>
+        <div class="result-card hidden" id="result-industries">
+          <div class="result-header">
+            <h3>Industry Analysis</h3>
+            <button class="btn-copy" onclick="copyResult('result-industries')">Copy</button>
+          </div>
+          <div class="result-body markdown-output" id="output-industries"></div>
+        </div>
+      </section>
+
+      <!-- M&A TRACKER TAB -->
+      <section class="tab-panel" id="tab-ma">
+        <div class="card form-card">
+          <div class="card-header">
+            <h2>M&amp;A Tracker</h2>
+            <p>Track recent mergers and acquisitions in Maverix's focus area — Toronto-based growth equity tech.</p>
+          </div>
+          <div class="form-row">
+            <label for="ma-timeframe">Timeframe</label>
+            <input type="text" id="ma-timeframe" placeholder="e.g. last 30 days, last quarter" value="last 30 days" />
+          </div>
+          <div class="form-row">
+            <label for="ma-subsectors">Sub-sectors (optional)</label>
+            <input type="text" id="ma-subsectors" placeholder="e.g. SaaS, Fintech, AI — leave blank for all tech" />
+          </div>
+          <button class="btn btn-primary" id="btn-ma">
+            <span class="btn-icon">🤝</span> Track M&amp;A Activity
+          </button>
+        </div>
+        <div class="result-card hidden" id="result-ma">
+          <div class="result-header">
+            <h3>M&amp;A Activity Report</h3>
+            <button class="btn-copy" onclick="copyResult('result-ma')">Copy</button>
+          </div>
+          <div class="result-body markdown-output" id="output-ma"></div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
