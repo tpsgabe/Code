@@ -1,13 +1,13 @@
 import os
 import json
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context
-from anthropic import Anthropic
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """You are an expert private equity analyst assistant for Maverix Private Equity,
 a Toronto-based growth equity firm focused on technology investments. You help analysts source and
@@ -15,19 +15,19 @@ evaluate investment opportunities efficiently. Your analysis is concise, data-dr
 Always structure your responses with clear headings and bullet points for easy scanning.
 Focus on: business model clarity, growth signals, market positioning, and red flags."""
 
+model = genai.GenerativeModel(
+    model_name="gemini-2.0-flash",
+    system_instruction=SYSTEM_PROMPT,
+)
 
-def stream_claude(messages: list, system: str = SYSTEM_PROMPT) -> Response:
-    """Stream a Claude response as Server-Sent Events."""
+
+def stream_gemini(prompt: str) -> Response:
+    """Stream a Gemini response as Server-Sent Events."""
     def generate():
-        with client.messages.stream(
-            model="claude-opus-4-6",
-            max_tokens=2048,
-            system=system,
-            thinking={"type": "adaptive"},
-            messages=messages,
-        ) as stream:
-            for text in stream.text_stream:
-                yield f"data: {json.dumps({'text': text})}\n\n"
+        response = model.generate_content(prompt, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield f"data: {json.dumps({'text': chunk.text})}\n\n"
         yield "data: [DONE]\n\n"
 
     return Response(
@@ -52,10 +52,7 @@ def summarize_company():
     if not company_info:
         return jsonify({"error": "No company information provided"}), 400
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"""Analyze this company profile and provide a structured investment summary for a PE analyst:
+    prompt = f"""Analyze this company profile and provide a structured investment summary for a PE analyst:
 
 {company_info}
 
@@ -67,10 +64,8 @@ Structure your response as follows:
 ## Market Position & Competitive Landscape
 ## Key Risks / Red Flags
 ## Investment Thesis (1-2 sentences)
-""",
-        }
-    ]
-    return stream_claude(messages)
+"""
+    return stream_gemini(prompt)
 
 
 @app.route("/api/emerging-industries", methods=["POST"])
@@ -81,10 +76,7 @@ def emerging_industries():
 
     focus = f"Focus on these sectors: {sectors}." if sectors else "Cover all technology sectors."
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"""As of {timeframe}, identify emerging industries and sectors showing strong investment momentum relevant to a Toronto-based growth equity technology investor.
+    prompt = f"""As of {timeframe}, identify emerging industries and sectors showing strong investment momentum relevant to a Toronto-based growth equity technology investor.
 
 {focus}
 
@@ -102,10 +94,8 @@ For each sector include:
 ## Sectors to Avoid or Deprioritize
 
 ## Actionable Recommendations for Maverix
-""",
-        }
-    ]
-    return stream_claude(messages)
+"""
+    return stream_gemini(prompt)
 
 
 @app.route("/api/ma-tracker", methods=["POST"])
@@ -116,10 +106,7 @@ def ma_tracker():
 
     focus = f"Focus specifically on: {subsectors}." if subsectors else ""
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"""Provide a comprehensive M&A activity summary for the Toronto-based growth equity technology sector over the {timeframe}. {focus}
+    prompt = f"""Provide a comprehensive M&A activity summary for the Toronto-based growth equity technology sector over the {timeframe}. {focus}
 
 Structure your response as follows:
 ## M&A Activity Summary
@@ -146,10 +133,8 @@ Which PE/growth equity firms are most active and in what spaces.
 
 ## Deal Sourcing Leads
 Based on this M&A activity, suggest 3-5 types of companies Maverix should be actively sourcing right now.
-""",
-        }
-    ]
-    return stream_claude(messages)
+"""
+    return stream_gemini(prompt)
 
 
 @app.route("/api/morning-digest", methods=["POST"])
@@ -157,10 +142,7 @@ def morning_digest():
     data = request.get_json()
     date = data.get("date", "today")
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"""Generate a concise daily morning digest for the Maverix Private Equity deal sourcing team for {date}.
+    prompt = f"""Generate a concise daily morning digest for the Maverix Private Equity deal sourcing team for {date}.
 
 This digest should be scannable in under 5 minutes and cover everything an analyst needs to start their day.
 
@@ -191,10 +173,8 @@ Key events, earnings, or announcements to watch this week that affect deal sourc
 
 ---
 *Generated by Maverix AI Deal Sourcing Assistant*
-""",
-        }
-    ]
-    return stream_claude(messages)
+"""
+    return stream_gemini(prompt)
 
 
 @app.route("/api/quick-screen", methods=["POST"])
@@ -206,10 +186,7 @@ def quick_screen():
     if not company_name:
         return jsonify({"error": "Company name required"}), 400
 
-    messages = [
-        {
-            "role": "user",
-            "content": f"""Perform a rapid investment screening for this company:
+    prompt = f"""Perform a rapid investment screening for this company:
 
 **Company:** {company_name}
 **Description:** {description if description else "No description provided — use your knowledge if available."}
@@ -233,10 +210,8 @@ Provide a 60-second screening assessment:
 
 ### Recommended Next Step
 (One sentence action)
-""",
-        }
-    ]
-    return stream_claude(messages)
+"""
+    return stream_gemini(prompt)
 
 
 if __name__ == "__main__":
