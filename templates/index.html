@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Maverix PE — AI Deal Sourcing</title>
+  <title>Maverix PE — Intelligence Platform</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <!-- Sidebar -->
+
+  <!-- ── SIDEBAR ─────────────────────────────────────────── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">M</div>
@@ -17,68 +18,684 @@
       </div>
     </div>
 
+    <div class="sidebar-section-label">OVERVIEW</div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" data-tab="digest">
-        <span class="nav-icon">☀️</span>
-        Morning Digest
+      <button class="nav-item active" data-tab="dashboard">
+        <span class="nav-icon">⬛</span> Dashboard
+      </button>
+      <button class="nav-item" data-tab="pipeline">
+        <span class="nav-icon">⬛</span> Deal Pipeline
+      </button>
+      <button class="nav-item" data-tab="portfolio">
+        <span class="nav-icon">⬛</span> Portfolio
+      </button>
+    </nav>
+
+    <div class="sidebar-section-label">AI TOOLS</div>
+    <nav class="sidebar-nav">
+      <button class="nav-item" data-tab="digest">
+        <span class="nav-icon">⬛</span> Morning Digest
       </button>
       <button class="nav-item" data-tab="company">
-        <span class="nav-icon">🏢</span>
-        Company Research
+        <span class="nav-icon">⬛</span> Company Research
       </button>
       <button class="nav-item" data-tab="quick-screen">
-        <span class="nav-icon">⚡</span>
-        Quick Screen
+        <span class="nav-icon">⬛</span> Quick Screen
       </button>
       <button class="nav-item" data-tab="industries">
-        <span class="nav-icon">📈</span>
-        Emerging Industries
+        <span class="nav-icon">⬛</span> Sector Trends
       </button>
       <button class="nav-item" data-tab="ma">
-        <span class="nav-icon">🤝</span>
-        M&amp;A Tracker
+        <span class="nav-icon">⬛</span> M&amp;A Tracker
       </button>
     </nav>
 
     <div class="sidebar-footer">
-      <div class="api-status" id="api-status">
+      <div class="api-status">
         <span class="status-dot"></span>
-        <span class="status-label">Claude Connected</span>
+        <span class="status-label">AI Connected</span>
       </div>
-      <p class="sidebar-disclaimer">Powered by Claude Opus 4.6</p>
+      <p class="sidebar-disclaimer">Maverix Intelligence Platform v2.1</p>
     </div>
   </aside>
 
-  <!-- Main content -->
+  <!-- ── MAIN ───────────────────────────────────────────── -->
   <main class="main">
-    <!-- Header -->
+
+    <!-- Market Ticker -->
+    <div class="ticker-bar">
+      <div class="ticker-track">
+        <span class="ticker-item up">TSX <b>22,847.34</b> +0.34%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item down">NASDAQ <b>19,234.56</b> -0.12%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">S&amp;P 500 <b>5,847.23</b> +0.08%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item down">CAD/USD <b>0.7234</b> -0.21%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">10Y Bond <b>3.87%</b> +0.04</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">TSX Tech <b>3,412.88</b> +1.14%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item down">Gold <b>$2,941.20</b> -0.33%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">WTI Oil <b>$71.44</b> +0.87%</span>
+        <!-- repeat for scroll -->
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">TSX <b>22,847.34</b> +0.34%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item down">NASDAQ <b>19,234.56</b> -0.12%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">S&amp;P 500 <b>5,847.23</b> +0.08%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item down">CAD/USD <b>0.7234</b> -0.21%</span>
+        <span class="ticker-sep">|</span>
+        <span class="ticker-item up">TSX Tech <b>3,412.88</b> +1.14%</span>
+      </div>
+    </div>
+
+    <!-- Topbar -->
     <header class="topbar">
       <div class="topbar-left">
-        <h1 class="page-title" id="page-title">Morning Digest</h1>
-        <p class="page-subtitle" id="page-subtitle">Your daily deal sourcing briefing</p>
+        <h1 class="page-title" id="page-title">Dashboard</h1>
+        <p class="page-subtitle" id="page-subtitle">Monday, March 30, 2026 · Toronto, ON</p>
       </div>
       <div class="topbar-right">
-        <span class="badge">Toronto Growth Equity · Tech Focus</span>
+        <div class="topbar-user">
+          <div class="user-avatar">JR</div>
+          <div class="user-info">
+            <span class="user-name">John Ruffolo</span>
+            <span class="user-role">Managing Partner</span>
+          </div>
+        </div>
       </div>
     </header>
 
-    <!-- Tab panels -->
+    <!-- ── TAB CONTENT ─────────────────────────────────── -->
     <div class="content">
 
-      <!-- MORNING DIGEST TAB -->
-      <section class="tab-panel active" id="tab-digest">
+      <!-- ══ DASHBOARD ══════════════════════════════════════ -->
+      <section class="tab-panel active" id="tab-dashboard">
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Assets Under Management</div>
+            <div class="stat-value">$1.24B</div>
+            <div class="stat-delta up">↑ Fund III 67% deployed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Deal Pipeline</div>
+            <div class="stat-value">14</div>
+            <div class="stat-delta up">↑ 3 new this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Portfolio Companies</div>
+            <div class="stat-value">23</div>
+            <div class="stat-delta up">↑ 2 exits YTD</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg. Revenue Multiple</div>
+            <div class="stat-value">6.2x</div>
+            <div class="stat-delta down">↓ from 7.1x in Q4 2025</div>
+          </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="dashboard-grid">
+
+          <!-- News Feed -->
+          <div class="dash-col dash-col-wide">
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Market Intelligence</h3>
+                <span class="panel-tag">Live Feed</span>
+              </div>
+
+              <article class="news-card featured">
+                <div class="news-meta">
+                  <span class="news-source">The Globe and Mail</span>
+                  <span class="news-date">Mar 30, 2026</span>
+                  <span class="news-tag tag-deal">M&A</span>
+                </div>
+                <h4 class="news-title">Shopify Acquires Toronto AI Startup Veridian Analytics for $340M, Marking One of Canada's Largest Tech Exits of 2026</h4>
+                <p class="news-body">Shopify Inc. has agreed to acquire Veridian Analytics, a Toronto-based machine learning startup specializing in real-time retail demand forecasting. The deal, valued at approximately $340M, represents a 9.4x revenue multiple and is expected to close in Q2 2026 pending regulatory approval.</p>
+                <div class="news-signal">
+                  <span class="signal-label">Maverix Signal:</span> Validates AI/ML valuations in Canadian retail tech. Monitor comparable exits in logistics & supply chain.
+                </div>
+              </article>
+
+              <article class="news-card">
+                <div class="news-meta">
+                  <span class="news-source">BNN Bloomberg</span>
+                  <span class="news-date">Mar 29, 2026</span>
+                  <span class="news-tag tag-funding">Funding</span>
+                </div>
+                <h4 class="news-title">BDC Capital Leads $45M Series B in CloudBridge Technologies, Targeting Mid-Market ERP Modernization</h4>
+                <p class="news-body">CloudBridge Technologies, a Montreal-based SaaS company, has closed a $45M Series B round led by BDC Capital with participation from Inovia Capital. The company's ARR grew 112% YoY to $8.2M on the back of a landmark deal with Bombardier.</p>
+              </article>
+
+              <article class="news-card">
+                <div class="news-meta">
+                  <span class="news-source">Financial Post</span>
+                  <span class="news-date">Mar 28, 2026</span>
+                  <span class="news-tag tag-market">Market</span>
+                </div>
+                <h4 class="news-title">Canadian Tech M&A Volume Hits 5-Year High in Q1 2026, Driven by U.S. Acquirer Interest</h4>
+                <p class="news-body">Deal activity in Canadian technology reached a 5-year high in Q1 2026, with 34 transactions totalling $2.1B in disclosed value. U.S. strategic acquirers accounted for 61% of deal volume, drawn by favourable CAD/USD exchange rates and deep talent pools in Toronto and Waterloo.</p>
+                <div class="news-signal">
+                  <span class="signal-label">Maverix Signal:</span> Favorable exit environment. Consider accelerating portfolio company prep for 2026–2027 exits.
+                </div>
+              </article>
+
+              <article class="news-card">
+                <div class="news-meta">
+                  <span class="news-source">Reuters</span>
+                  <span class="news-date">Mar 27, 2026</span>
+                  <span class="news-tag tag-deal">M&A</span>
+                </div>
+                <h4 class="news-title">Manulife Financial Backs $60M Growth Round in Toronto Insurtech Firm Axion Health</h4>
+                <p class="news-body">Axion Health, a Toronto-based insurtech company providing AI-powered claims processing for group benefits, has raised $60M in a growth round backed by Manulife Financial and Felicis Ventures. The company processes over $2.4B in annual claims across 140+ enterprise clients.</p>
+              </article>
+
+              <article class="news-card">
+                <div class="news-meta">
+                  <span class="news-source">TechCrunch</span>
+                  <span class="news-date">Mar 26, 2026</span>
+                  <span class="news-tag tag-market">Market</span>
+                </div>
+                <h4 class="news-title">PE Firms Flood Toronto's AI Corridor as Talent Density and Valuations Attract Global Capital</h4>
+                <p class="news-body">Toronto's "AI Corridor" — stretching from MaRS Discovery District to the University of Toronto — is attracting unprecedented interest from global PE and growth equity firms. At least seven U.S.-based growth equity funds have opened Toronto offices since January 2026.</p>
+                <div class="news-signal">
+                  <span class="signal-label">Maverix Signal:</span> Increased competition for deals. Lean into proprietary sourcing and existing network advantage.
+                </div>
+              </article>
+
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="dash-col dash-col-narrow">
+
+            <!-- Recent Deals -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Recent Market Deals</h3>
+                <span class="panel-tag">Q1 2026</span>
+              </div>
+              <div class="deal-list">
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">Veridian Analytics</span>
+                    <span class="deal-sector">AI / Retail Tech</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$340M</span>
+                    <span class="deal-type acquired">Acquired</span>
+                  </div>
+                </div>
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">CloudBridge Technologies</span>
+                    <span class="deal-sector">SaaS / ERP</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$45M</span>
+                    <span class="deal-type series-b">Series B</span>
+                  </div>
+                </div>
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">Axion Health</span>
+                    <span class="deal-sector">Insurtech</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$60M</span>
+                    <span class="deal-type growth">Growth</span>
+                  </div>
+                </div>
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">PayLink Solutions</span>
+                    <span class="deal-sector">Fintech / B2B</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$28M</span>
+                    <span class="deal-type series-a">Series A</span>
+                  </div>
+                </div>
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">Clearco</span>
+                    <span class="deal-sector">Revenue Finance</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$180M</span>
+                    <span class="deal-type acquired">Acquired</span>
+                  </div>
+                </div>
+                <div class="deal-item">
+                  <div class="deal-info">
+                    <span class="deal-company">Northstar Compliance</span>
+                    <span class="deal-sector">RegTech</span>
+                  </div>
+                  <div class="deal-right">
+                    <span class="deal-value">$22M</span>
+                    <span class="deal-type series-a">Series A</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sector Heatmap -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Sector Watch</h3>
+                <span class="panel-tag">Mar 2026</span>
+              </div>
+              <div class="sector-list">
+                <div class="sector-row">
+                  <span class="sector-name">AI / Machine Learning</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:92%"></div></div>
+                  <span class="sector-heat fire">🔥 Hot</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">Cybersecurity</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:85%"></div></div>
+                  <span class="sector-heat fire">🔥 Hot</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">Fintech</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:71%"></div></div>
+                  <span class="sector-heat rising">↑ Rising</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">HealthTech</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:65%"></div></div>
+                  <span class="sector-heat rising">↑ Rising</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">CleanTech</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:58%"></div></div>
+                  <span class="sector-heat stable">→ Stable</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">SaaS / ERP</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar" style="width:54%"></div></div>
+                  <span class="sector-heat stable">→ Stable</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">EdTech</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar cool" style="width:31%"></div></div>
+                  <span class="sector-heat cooling">↓ Cooling</span>
+                </div>
+                <div class="sector-row">
+                  <span class="sector-name">Crypto / Web3</span>
+                  <div class="sector-bar-wrap"><div class="sector-bar cool" style="width:22%"></div></div>
+                  <span class="sector-heat cooling">↓ Cooling</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3>This Week</h3>
+              </div>
+              <div class="event-list">
+                <div class="event-item">
+                  <div class="event-date-badge">MAR<span>31</span></div>
+                  <div class="event-info">
+                    <span class="event-title">IC Meeting — MedRecord AI</span>
+                    <span class="event-sub">Investment Committee · 10:00 AM</span>
+                  </div>
+                </div>
+                <div class="event-item">
+                  <div class="event-date-badge">APR<span>1</span></div>
+                  <div class="event-info">
+                    <span class="event-title">Management Presentation</span>
+                    <span class="event-sub">PayLink Solutions · 2:00 PM</span>
+                  </div>
+                </div>
+                <div class="event-item">
+                  <div class="event-date-badge">APR<span>2</span></div>
+                  <div class="event-info">
+                    <span class="event-title">Founder Call — Stealth AI Co.</span>
+                    <span class="event-sub">Early Sourcing · 11:30 AM</span>
+                  </div>
+                </div>
+                <div class="event-item">
+                  <div class="event-date-badge">APR<span>3</span></div>
+                  <div class="event-info">
+                    <span class="event-title">CVCA Spring Conference</span>
+                    <span class="event-sub">Metro Toronto Convention Centre</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ DEAL PIPELINE ══════════════════════════════════ -->
+      <section class="tab-panel" id="tab-pipeline">
+        <div class="pipeline-header-row">
+          <div class="pipeline-stats">
+            <span>14 Active Deals</span>
+            <span>·</span>
+            <span>$2.1B Total Pipeline Value</span>
+            <span>·</span>
+            <span>Avg. Time in Pipeline: 47 days</span>
+          </div>
+        </div>
+        <div class="pipeline-board">
+
+          <div class="pipeline-col">
+            <div class="pipeline-col-header">
+              <span class="pipeline-stage-dot dot-sourcing"></span>
+              Sourcing
+              <span class="pipeline-count">5</span>
+            </div>
+            <div class="pipeline-cards">
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">Northstar Compliance</span>
+                  <span class="pc-sector">RegTech</span>
+                </div>
+                <div class="pc-meta">$18–25M target · Series A</div>
+                <div class="pc-owner">SA · Added Mar 28</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">Luminary Robotics</span>
+                  <span class="pc-sector">Industrial AI</span>
+                </div>
+                <div class="pc-meta">$30–40M target · Series B</div>
+                <div class="pc-owner">GR · Added Mar 25</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">TrueData Inc.</span>
+                  <span class="pc-sector">Data Infrastructure</span>
+                </div>
+                <div class="pc-meta">$50M target · Growth</div>
+                <div class="pc-owner">MK · Added Mar 22</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">Stealth Fintech Co.</span>
+                  <span class="pc-sector">B2B Payments</span>
+                </div>
+                <div class="pc-meta">Est. $20–30M · Series A</div>
+                <div class="pc-owner">JR · Added Mar 20</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">GreenTrace Analytics</span>
+                  <span class="pc-sector">CleanTech / ESG</span>
+                </div>
+                <div class="pc-meta">$15M target · Series A</div>
+                <div class="pc-owner">SA · Added Mar 18</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-col">
+            <div class="pipeline-col-header">
+              <span class="pipeline-stage-dot dot-screen"></span>
+              Screening
+              <span class="pipeline-count">4</span>
+            </div>
+            <div class="pipeline-cards">
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">PayLink Solutions</span>
+                  <span class="pc-sector">Fintech</span>
+                </div>
+                <div class="pc-meta">$28M · Series A</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:60%"></div></div>
+                <div class="pc-owner">GR · IC Apr 8</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">Axiom Security</span>
+                  <span class="pc-sector">Cybersecurity</span>
+                </div>
+                <div class="pc-meta">$35M · Series B</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:45%"></div></div>
+                <div class="pc-owner">MK · Mgmt call Apr 5</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">SupplyBridge AI</span>
+                  <span class="pc-sector">Supply Chain</span>
+                </div>
+                <div class="pc-meta">$22M · Series A</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:35%"></div></div>
+                <div class="pc-owner">SA · Model review</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">HRFlow Technologies</span>
+                  <span class="pc-sector">HR Tech</span>
+                </div>
+                <div class="pc-meta">$18M · Series A</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:25%"></div></div>
+                <div class="pc-owner">JR · Initial screen</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-col">
+            <div class="pipeline-col-header">
+              <span class="pipeline-stage-dot dot-diligence"></span>
+              Diligence
+              <span class="pipeline-count">3</span>
+            </div>
+            <div class="pipeline-cards">
+              <div class="pipeline-card hot">
+                <div class="pc-hot-badge">Priority</div>
+                <div class="pc-top">
+                  <span class="pc-name">MedRecord AI</span>
+                  <span class="pc-sector">HealthTech</span>
+                </div>
+                <div class="pc-meta">$62M · Series B</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:80%"></div></div>
+                <div class="pc-checklist">
+                  <span class="check done">✓ Financial Model</span>
+                  <span class="check done">✓ Legal Review</span>
+                  <span class="check done">✓ Tech DD</span>
+                  <span class="check pending">○ Customer Refs</span>
+                  <span class="check pending">○ Final IC</span>
+                </div>
+                <div class="pc-owner">JR · IC Mar 31</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">FleetEdge Systems</span>
+                  <span class="pc-sector">Fleet / IoT</span>
+                </div>
+                <div class="pc-meta">$40M · Series B</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:55%"></div></div>
+                <div class="pc-checklist">
+                  <span class="check done">✓ Financial Model</span>
+                  <span class="check done">✓ Tech DD</span>
+                  <span class="check pending">○ Legal Review</span>
+                  <span class="check pending">○ Customer Refs</span>
+                </div>
+                <div class="pc-owner">MK · Target Apr 14</div>
+              </div>
+              <div class="pipeline-card">
+                <div class="pc-top">
+                  <span class="pc-name">Quiltt Financial</span>
+                  <span class="pc-sector">Open Banking</span>
+                </div>
+                <div class="pc-meta">$30M · Series A</div>
+                <div class="pc-bar-wrap"><div class="pc-bar" style="width:40%"></div></div>
+                <div class="pc-checklist">
+                  <span class="check done">✓ Financial Model</span>
+                  <span class="check pending">○ Tech DD</span>
+                  <span class="check pending">○ Legal Review</span>
+                </div>
+                <div class="pc-owner">GR · Target Apr 21</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pipeline-col">
+            <div class="pipeline-col-header">
+              <span class="pipeline-stage-dot dot-closed"></span>
+              Closed / Passed
+              <span class="pipeline-count">2</span>
+            </div>
+            <div class="pipeline-cards">
+              <div class="pipeline-card closed">
+                <div class="pc-closed-badge invested">✓ Invested</div>
+                <div class="pc-top">
+                  <span class="pc-name">Vantage AI</span>
+                  <span class="pc-sector">AI / Analytics</span>
+                </div>
+                <div class="pc-meta">$25M · Closed Feb 2026</div>
+                <div class="pc-owner">Fund III · 5.8x target</div>
+              </div>
+              <div class="pipeline-card closed">
+                <div class="pc-closed-badge passed">✗ Passed</div>
+                <div class="pc-top">
+                  <span class="pc-name">Blockform Inc.</span>
+                  <span class="pc-sector">Web3 / Infra</span>
+                </div>
+                <div class="pc-meta">$50M · Valuation concern</div>
+                <div class="pc-owner">Passed Mar 12 · GR</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══ PORTFOLIO ══════════════════════════════════════ -->
+      <section class="tab-panel" id="tab-portfolio">
+        <div class="portfolio-grid">
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">VA</div>
+              <div>
+                <div class="port-name">Vantage AI</div>
+                <div class="port-sector">AI / Analytics · Series B</div>
+              </div>
+              <span class="port-status active">Active</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$25M</b></div>
+              <div class="port-stat"><span>Entry Multiple</span><b>5.8x Rev</b></div>
+              <div class="port-stat"><span>ARR</span><b>$4.3M</b></div>
+              <div class="port-stat"><span>Growth</span><b>+94% YoY</b></div>
+            </div>
+            <div class="port-note">🔥 Top performer · On track for 2027 exit</div>
+          </div>
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">TL</div>
+              <div>
+                <div class="port-name">Tulip Retail</div>
+                <div class="port-sector">Retail Tech · Growth Equity</div>
+              </div>
+              <span class="port-status active">Active</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$40M</b></div>
+              <div class="port-stat"><span>Entry Multiple</span><b>7.2x Rev</b></div>
+              <div class="port-stat"><span>ARR</span><b>$11.8M</b></div>
+              <div class="port-stat"><span>Growth</span><b>+61% YoY</b></div>
+            </div>
+            <div class="port-note">→ Exploring strategic sale process H2 2026</div>
+          </div>
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">NX</div>
+              <div>
+                <div class="port-name">Nexus Cyber</div>
+                <div class="port-sector">Cybersecurity · Series C</div>
+              </div>
+              <span class="port-status active">Active</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$55M</b></div>
+              <div class="port-stat"><span>Entry Multiple</span><b>8.1x Rev</b></div>
+              <div class="port-stat"><span>ARR</span><b>$18.2M</b></div>
+              <div class="port-stat"><span>Growth</span><b>+78% YoY</b></div>
+            </div>
+            <div class="port-note">↑ U.S. expansion underway · Hire VP Sales</div>
+          </div>
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">PF</div>
+              <div>
+                <div class="port-name">Pairfinance</div>
+                <div class="port-sector">Fintech / Lending · Series B</div>
+              </div>
+              <span class="port-status watch">Watch</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$18M</b></div>
+              <div class="port-stat"><span>Entry Multiple</span><b>6.4x Rev</b></div>
+              <div class="port-stat"><span>ARR</span><b>$3.1M</b></div>
+              <div class="port-stat"><span>Growth</span><b>+28% YoY</b></div>
+            </div>
+            <div class="port-note">⚠ Growth below plan · CFO transition in progress</div>
+          </div>
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">HC</div>
+              <div>
+                <div class="port-name">HealthCheck AI</div>
+                <div class="port-sector">HealthTech · Series B</div>
+              </div>
+              <span class="port-status exited">Exited</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$22M</b></div>
+              <div class="port-stat"><span>Exit Value</span><b>$114M</b></div>
+              <div class="port-stat"><span>MOIC</span><b>5.2x</b></div>
+              <div class="port-stat"><span>IRR</span><b>38%</b></div>
+            </div>
+            <div class="port-note">✓ Acquired by WELL Health · Feb 2026</div>
+          </div>
+          <div class="portfolio-card">
+            <div class="port-header">
+              <div class="port-logo">LG</div>
+              <div>
+                <div class="port-name">LogiGrid</div>
+                <div class="port-sector">Supply Chain SaaS · Series B</div>
+              </div>
+              <span class="port-status exited">Exited</span>
+            </div>
+            <div class="port-stats">
+              <div class="port-stat"><span>Invested</span><b>$30M</b></div>
+              <div class="port-stat"><span>Exit Value</span><b>$198M</b></div>
+              <div class="port-stat"><span>MOIC</span><b>6.6x</b></div>
+              <div class="port-stat"><span>IRR</span><b>44%</b></div>
+            </div>
+            <div class="port-note">✓ Acquired by Manhattan Associates · Jan 2026</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ AI TOOLS ════════════════════════════════════ -->
+
+      <!-- Morning Digest -->
+      <section class="tab-panel" id="tab-digest">
         <div class="card form-card">
           <div class="card-header">
-            <h2>Generate Morning Digest</h2>
-            <p>Get a comprehensive deal sourcing briefing to start your day.</p>
+            <h2>Morning Digest</h2>
+            <p>AI-generated daily briefing covering markets, deals, and sourcing priorities.</p>
           </div>
           <div class="form-row">
             <label for="digest-date">Date</label>
-            <input type="text" id="digest-date" placeholder="e.g. Monday, March 30, 2026" />
+            <input type="text" id="digest-date" />
           </div>
-          <button class="btn btn-primary" id="btn-digest">
-            <span class="btn-icon">☀️</span> Generate Digest
-          </button>
+          <button class="btn btn-primary" id="btn-digest">Generate Digest</button>
         </div>
         <div class="result-card hidden" id="result-digest">
           <div class="result-header">
@@ -89,25 +706,18 @@
         </div>
       </section>
 
-      <!-- COMPANY RESEARCH TAB -->
+      <!-- Company Research -->
       <section class="tab-panel" id="tab-company">
         <div class="card form-card">
           <div class="card-header">
             <h2>Company Research</h2>
-            <p>Paste a company profile from PitchBook, Capital IQ, or any source. Claude will extract key investment signals.</p>
+            <p>Paste a company profile from PitchBook, Capital IQ, or any source for an instant investment summary.</p>
           </div>
           <div class="form-row">
             <label for="company-info">Company Profile / Description</label>
-            <textarea
-              id="company-info"
-              rows="10"
-              placeholder="Paste company description, funding history, financials, or any available information here...
-
-Example: 'Acme SaaS Inc. is a Toronto-based B2B software company founded in 2019. They provide AI-powered workflow automation for mid-market financial services firms. Revenue: $8M ARR, growing 85% YoY. Last raised $12M Series A in 2023 led by BDC Capital. Team of 45. Customers include TD Bank, Manulife...'"></textarea>
+            <textarea id="company-info" rows="10" placeholder="Paste company description, funding history, financials, or any available information here..."></textarea>
           </div>
-          <button class="btn btn-primary" id="btn-company">
-            <span class="btn-icon">🏢</span> Analyze Company
-          </button>
+          <button class="btn btn-primary" id="btn-company">Analyze Company</button>
         </div>
         <div class="result-card hidden" id="result-company">
           <div class="result-header">
@@ -118,12 +728,12 @@ Example: 'Acme SaaS Inc. is a Toronto-based B2B software company founded in 2019
         </div>
       </section>
 
-      <!-- QUICK SCREEN TAB -->
+      <!-- Quick Screen -->
       <section class="tab-panel" id="tab-quick-screen">
         <div class="card form-card">
           <div class="card-header">
             <h2>Quick Screen</h2>
-            <p>Rapidly assess a company name for Maverix fit — get a pass/fail in seconds.</p>
+            <p>Rapid pass/fail assessment. Enter a company name for an instant Maverix fit score.</p>
           </div>
           <div class="form-row">
             <label for="screen-name">Company Name</label>
@@ -131,11 +741,9 @@ Example: 'Acme SaaS Inc. is a Toronto-based B2B software company founded in 2019
           </div>
           <div class="form-row">
             <label for="screen-desc">Brief Description (optional)</label>
-            <textarea id="screen-desc" rows="3" placeholder="Optional: add any context you have about the company..."></textarea>
+            <textarea id="screen-desc" rows="3" placeholder="Any context you have..."></textarea>
           </div>
-          <button class="btn btn-primary" id="btn-screen">
-            <span class="btn-icon">⚡</span> Quick Screen
-          </button>
+          <button class="btn btn-primary" id="btn-screen">Quick Screen</button>
         </div>
         <div class="result-card hidden" id="result-screen">
           <div class="result-header">
@@ -146,52 +754,48 @@ Example: 'Acme SaaS Inc. is a Toronto-based B2B software company founded in 2019
         </div>
       </section>
 
-      <!-- EMERGING INDUSTRIES TAB -->
+      <!-- Sector Trends -->
       <section class="tab-panel" id="tab-industries">
         <div class="card form-card">
           <div class="card-header">
-            <h2>Emerging Industries</h2>
+            <h2>Sector Trends</h2>
             <p>Identify high-momentum sectors based on recent investment trends and market activity.</p>
           </div>
           <div class="form-row">
             <label for="industry-sectors">Sectors to Focus On (optional)</label>
-            <input type="text" id="industry-sectors" placeholder="e.g. AI/ML, Fintech, HealthTech, CleanTech — leave blank for all" />
+            <input type="text" id="industry-sectors" placeholder="e.g. AI/ML, Fintech, HealthTech — leave blank for all" />
           </div>
           <div class="form-row">
             <label for="industry-timeframe">Timeframe</label>
-            <input type="text" id="industry-timeframe" placeholder="e.g. Q1 2026, H1 2026" value="Q1 2026" />
+            <input type="text" id="industry-timeframe" value="Q1 2026" />
           </div>
-          <button class="btn btn-primary" id="btn-industries">
-            <span class="btn-icon">📈</span> Analyze Trends
-          </button>
+          <button class="btn btn-primary" id="btn-industries">Analyze Trends</button>
         </div>
         <div class="result-card hidden" id="result-industries">
           <div class="result-header">
-            <h3>Industry Analysis</h3>
+            <h3>Sector Analysis</h3>
             <button class="btn-copy" onclick="copyResult('result-industries')">Copy</button>
           </div>
           <div class="result-body markdown-output" id="output-industries"></div>
         </div>
       </section>
 
-      <!-- M&A TRACKER TAB -->
+      <!-- M&A Tracker -->
       <section class="tab-panel" id="tab-ma">
         <div class="card form-card">
           <div class="card-header">
             <h2>M&amp;A Tracker</h2>
-            <p>Track recent mergers and acquisitions in Maverix's focus area — Toronto-based growth equity tech.</p>
+            <p>Track recent deal activity in Maverix's focus area — Toronto-based growth equity tech.</p>
           </div>
           <div class="form-row">
             <label for="ma-timeframe">Timeframe</label>
-            <input type="text" id="ma-timeframe" placeholder="e.g. last 30 days, last quarter" value="last 30 days" />
+            <input type="text" id="ma-timeframe" value="last 30 days" />
           </div>
           <div class="form-row">
             <label for="ma-subsectors">Sub-sectors (optional)</label>
-            <input type="text" id="ma-subsectors" placeholder="e.g. SaaS, Fintech, AI — leave blank for all tech" />
+            <input type="text" id="ma-subsectors" placeholder="e.g. SaaS, Fintech, AI" />
           </div>
-          <button class="btn btn-primary" id="btn-ma">
-            <span class="btn-icon">🤝</span> Track M&amp;A Activity
-          </button>
+          <button class="btn btn-primary" id="btn-ma">Track M&amp;A Activity</button>
         </div>
         <div class="result-card hidden" id="result-ma">
           <div class="result-header">
