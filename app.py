@@ -1,12 +1,19 @@
 import os
 import json
-from flask import Flask, render_template, request, jsonify, Response, stream_with_context
+import sqlite3
+from datetime import datetime
+from functools import wraps
+from flask import (Flask, render_template, request, jsonify, Response,
+                   stream_with_context, session, redirect, url_for)
+from werkzeug.security import generate_password_hash, check_password_hash
 import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'maverix-pe-dev-secret-2026')
+
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """You are an expert private equity analyst assistant for Maverix Private Equity,
@@ -20,50 +27,263 @@ model = genai.GenerativeModel(
     system_instruction=SYSTEM_PROMPT,
 )
 
+# ── Database ────────────────────────────────────────────────
+
+DB = os.path.join(os.path.dirname(__file__), 'maverix.db')
+
+def get_db():
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        username      TEXT    UNIQUE NOT NULL,
+        name          TEXT    NOT NULL,
+        role          TEXT    NOT NULL,
+        initials      TEXT    NOT NULL,
+        password_hash TEXT    NOT NULL
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS deals (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        company       TEXT    NOT NULL,
+        sector        TEXT    NOT NULL,
+        target_amount TEXT,
+        round_type    TEXT,
+        stage         TEXT    NOT NULL DEFAULT 'sourcing',
+        outcome       TEXT,
+        notes         TEXT,
+        owner         TEXT,
+        created_at    TEXT    DEFAULT (datetime('now')),
+        updated_at    TEXT    DEFAULT (datetime('now'))
+    )''')
+
+    # Seed users
+    seed_users = [
+        ('jruffolo', 'John Ruffolo',  'Managing Partner', 'JR', 'password123'),
+        ('sandrews',  'Sarah Andrews', 'Associate',        'SA', 'password123'),
+        ('mkim',      'Mike Kim',      'Analyst',          'MK', 'password123'),
+        ('grussell',  'Greg Russell',  'Vice President',   'GR', 'password123'),
+    ]
+    for u in seed_users:
+        try:
+            c.execute('''INSERT INTO users (username, name, role, initials, password_hash)
+                         VALUES (?, ?, ?, ?, ?)''',
+                      (u[0], u[1], u[2], u[3], generate_password_hash(u[4])))
+        except sqlite3.IntegrityError:
+            pass
+
+    # Seed deals (only once)
+    c.execute('SELECT COUNT(*) FROM deals')
+    if c.fetchone()[0] == 0:
+        seed_deals = [
+            ('Northstar Compliance',  'RegTech',            '$18–25M', 'Series A', 'sourcing',   None,       'Inbound referral via CVCA',         'SA'),
+            ('Luminary Robotics',     'Industrial AI',      '$30–40M', 'Series B', 'sourcing',   None,       'Warm intro from BDC Capital',        'GR'),
+            ('TrueData Inc.',         'Data Infrastructure','$50M',    'Growth',   'sourcing',   None,       'Proprietary sourcing',               'MK'),
+            ('Stealth Fintech Co.',   'B2B Payments',       '$20–30M', 'Series A', 'sourcing',   None,       'Founder call scheduled Apr 2',       'JR'),
+            ('GreenTrace Analytics',  'CleanTech / ESG',    '$15M',    'Series A', 'sourcing',   None,       'MaRS referral',                      'SA'),
+            ('PayLink Solutions',     'Fintech',            '$28M',    'Series A', 'screening',  None,       'IC Apr 8',                           'GR'),
+            ('Axiom Security',        'Cybersecurity',      '$35M',    'Series B', 'screening',  None,       'Mgmt call Apr 5',                    'MK'),
+            ('SupplyBridge AI',       'Supply Chain',       '$22M',    'Series A', 'screening',  None,       'Financial model in review',          'SA'),
+            ('HRFlow Technologies',   'HR Tech',            '$18M',    'Series A', 'screening',  None,       'Initial screen complete',            'JR'),
+            ('MedRecord AI',          'HealthTech',         '$62M',    'Series B', 'diligence',  None,       'IC Mar 31 — Priority',               'JR'),
+            ('FleetEdge Systems',     'Fleet / IoT',        '$40M',    'Series B', 'diligence',  None,       'Legal review in progress',           'MK'),
+            ('Quiltt Financial',      'Open Banking',       '$30M',    'Series A', 'diligence',  None,       'Tech DD underway',                   'GR'),
+            ('Vantage AI',            'AI / Analytics',     '$25M',    'Growth',   'closed',     'invested', 'Fund III · Closed Feb 2026',         'JR'),
+            ('Blockform Inc.',        'Web3 / Infra',       '$50M',    'Series B', 'closed',     'passed',   'Valuation concern — 18x revenue',   'GR'),
+        ]
+        c.executemany('''INSERT INTO deals
+            (company, sector, target_amount, round_type, stage, outcome, notes, owner)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', seed_deals)
+
+    conn.commit()
+    conn.close()
+
+# ── Auth helpers ────────────────────────────────────────────
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            if request.is_json:
+                return jsonify({'error': 'Not authenticated'}), 401
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
+
+# ── Auth routes ─────────────────────────────────────────────
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
+        conn = get_db()
+        user = conn.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        conn.close()
+        if user and check_password_hash(user['password_hash'], password):
+            session['user_id']   = user['id']
+            session['user_name'] = user['name']
+            session['user_role'] = user['role']
+            session['user_init'] = user['initials']
+            return redirect(url_for('index'))
+        error = 'Invalid username or password.'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+# ── Main app ─────────────────────────────────────────────────
+
+@app.route('/')
+@login_required
+def index():
+    return render_template('index.html',
+                           user_name=session['user_name'],
+                           user_role=session['user_role'],
+                           user_init=session['user_init'])
+
+# ── Deals API ────────────────────────────────────────────────
+
+@app.route('/api/deals', methods=['GET'])
+@login_required
+def get_deals():
+    conn = get_db()
+    deals = conn.execute('SELECT * FROM deals ORDER BY created_at DESC').fetchall()
+    conn.close()
+    return jsonify([dict(d) for d in deals])
+
+@app.route('/api/deals', methods=['POST'])
+@login_required
+def create_deal():
+    data = request.get_json()
+    required = ('company', 'sector', 'stage')
+    if not all(data.get(f) for f in required):
+        return jsonify({'error': 'company, sector and stage are required'}), 400
+    conn = get_db()
+    cur = conn.execute('''INSERT INTO deals
+        (company, sector, target_amount, round_type, stage, outcome, notes, owner)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', (
+        data['company'], data['sector'],
+        data.get('target_amount', ''), data.get('round_type', ''),
+        data['stage'], data.get('outcome'),
+        data.get('notes', ''), data.get('owner', session.get('user_init', '')),
+    ))
+    conn.commit()
+    deal = conn.execute('SELECT * FROM deals WHERE id = ?', (cur.lastrowid,)).fetchone()
+    conn.close()
+    return jsonify(dict(deal)), 201
+
+@app.route('/api/deals/<int:deal_id>', methods=['PUT'])
+@login_required
+def update_deal(deal_id):
+    data = request.get_json()
+    fields = ['company', 'sector', 'target_amount', 'round_type',
+              'stage', 'outcome', 'notes', 'owner']
+    updates = {k: data[k] for k in fields if k in data}
+    if not updates:
+        return jsonify({'error': 'Nothing to update'}), 400
+    updates['updated_at'] = datetime.now().isoformat()
+    set_clause = ', '.join(f'{k} = ?' for k in updates)
+    values = list(updates.values()) + [deal_id]
+    conn = get_db()
+    conn.execute(f'UPDATE deals SET {set_clause} WHERE id = ?', values)
+    conn.commit()
+    deal = conn.execute('SELECT * FROM deals WHERE id = ?', (deal_id,)).fetchone()
+    conn.close()
+    if not deal:
+        return jsonify({'error': 'Deal not found'}), 404
+    return jsonify(dict(deal))
+
+@app.route('/api/deals/<int:deal_id>', methods=['DELETE'])
+@login_required
+def delete_deal(deal_id):
+    conn = get_db()
+    conn.execute('DELETE FROM deals WHERE id = ?', (deal_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'ok': True})
+
+@app.route('/api/stats', methods=['GET'])
+@login_required
+def get_stats():
+    conn = get_db()
+    rows = conn.execute('''SELECT stage, outcome, COUNT(*) as cnt
+                           FROM deals GROUP BY stage, outcome''').fetchall()
+    conn.close()
+    counts = {'sourcing': 0, 'screening': 0, 'diligence': 0,
+              'closed_invested': 0, 'closed_passed': 0}
+    for r in rows:
+        if r['stage'] == 'closed':
+            k = f"closed_{r['outcome']}" if r['outcome'] else 'closed_passed'
+            counts[k] = counts.get(k, 0) + r['cnt']
+        else:
+            counts[r['stage']] = counts.get(r['stage'], 0) + r['cnt']
+    counts['active'] = counts['sourcing'] + counts['screening'] + counts['diligence']
+    return jsonify(counts)
+
+@app.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    conn = get_db()
+    users = conn.execute('SELECT id, username, name, role, initials FROM users').fetchall()
+    conn.close()
+    return jsonify([dict(u) for u in users])
+
+# ── AI streaming ─────────────────────────────────────────────
 
 def stream_gemini(prompt: str) -> Response:
-    """Stream a Gemini response as Server-Sent Events."""
     def generate():
         try:
-            response = model.generate_content(prompt, stream=True)
-            for chunk in response:
+            resp = model.generate_content(prompt, stream=True)
+            for chunk in resp:
                 try:
-                    text = chunk.text
-                    if text:
-                        yield f"data: {json.dumps({'text': text})}\n\n"
+                    if chunk.text:
+                        yield f"data: {json.dumps({'text': chunk.text})}\n\n"
                 except Exception:
                     pass
         except Exception as e:
             yield f"data: {json.dumps({'text': f'**Error:** {str(e)}'})}\n\n"
         yield "data: [DONE]\n\n"
+    return Response(stream_with_context(generate()), mimetype="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
-    return Response(
-        stream_with_context(generate()),
-        mimetype="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-        },
-    )
+def get_pipeline_context():
+    """Inject live pipeline data into AI prompts."""
+    conn = get_db()
+    deals = conn.execute(
+        "SELECT company, sector, target_amount, round_type, stage, notes FROM deals WHERE stage != 'closed'"
+    ).fetchall()
+    conn.close()
+    if not deals:
+        return ""
+    lines = ["Current Maverix Deal Pipeline (for context):"]
+    for d in deals:
+        lines.append(f"  - {d['company']} ({d['sector']}, {d['round_type'] or 'TBD'}, "
+                     f"{d['target_amount'] or 'TBD'}) — Stage: {d['stage'].capitalize()}")
+    return "\n" + "\n".join(lines) + "\n"
 
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-@app.route("/api/summarize-company", methods=["POST"])
+@app.route('/api/summarize-company', methods=['POST'])
+@login_required
 def summarize_company():
     data = request.get_json()
-    company_info = data.get("company_info", "").strip()
+    company_info = data.get('company_info', '').strip()
     if not company_info:
-        return jsonify({"error": "No company information provided"}), 400
-
-    prompt = f"""Analyze this company profile and provide a structured investment summary for a PE analyst:
+        return jsonify({'error': 'No company information provided'}), 400
+    prompt = f"""Analyze this company profile and provide a structured investment summary:
 
 {company_info}
 
-Structure your response as follows:
 ## Company Overview
 ## Business Model
 ## Funding History & Valuation
@@ -74,152 +294,113 @@ Structure your response as follows:
 """
     return stream_gemini(prompt)
 
-
-@app.route("/api/emerging-industries", methods=["POST"])
+@app.route('/api/emerging-industries', methods=['POST'])
+@login_required
 def emerging_industries():
     data = request.get_json()
-    sectors = data.get("sectors", "").strip()
-    timeframe = data.get("timeframe", "Q1 2026")
-
-    focus = f"Focus on these sectors: {sectors}." if sectors else "Cover all technology sectors."
-
-    prompt = f"""As of {timeframe}, identify emerging industries and sectors showing strong investment momentum relevant to a Toronto-based growth equity technology investor.
+    sectors = data.get('sectors', '').strip()
+    timeframe = data.get('timeframe', 'Q1 2026')
+    focus = f"Focus on: {sectors}." if sectors else "Cover all technology sectors."
+    prompt = f"""As of {timeframe}, identify emerging industries showing strong investment momentum for a Toronto-based growth equity technology investor.
 
 {focus}
 
-Structure your response as follows:
 ## Top Emerging Sectors (ranked by momentum)
-For each sector include:
-- **Why it's trending**: key drivers
-- **Recent notable deals**: illustrative examples
-- **Valuation dynamics**: multiples, trends
-- **Toronto/Canadian angle**: local opportunity or market context
-- **Recommended focus areas**: specific sub-segments to prioritize
+For each: Why trending · Recent notable deals · Valuation dynamics · Toronto/Canadian angle · Recommended sub-segments
 
-## Sectors to Watch (early stage, not yet peak)
+## Sectors to Watch (early stage)
 
-## Sectors to Avoid or Deprioritize
+## Sectors to Avoid
 
 ## Actionable Recommendations for Maverix
 """
     return stream_gemini(prompt)
 
-
-@app.route("/api/ma-tracker", methods=["POST"])
+@app.route('/api/ma-tracker', methods=['POST'])
+@login_required
 def ma_tracker():
     data = request.get_json()
-    timeframe = data.get("timeframe", "last 30 days")
-    subsectors = data.get("subsectors", "").strip()
-
+    timeframe = data.get('timeframe', 'last 30 days')
+    subsectors = data.get('subsectors', '').strip()
     focus = f"Focus specifically on: {subsectors}." if subsectors else ""
+    prompt = f"""Provide a comprehensive M&A activity summary for Toronto-based growth equity tech over the {timeframe}. {focus}
 
-    prompt = f"""Provide a comprehensive M&A activity summary for the Toronto-based growth equity technology sector over the {timeframe}. {focus}
-
-Structure your response as follows:
 ## M&A Activity Summary
-Brief overview of deal volume and sentiment.
-
 ## Notable Deals (Toronto & Canadian Tech Focus)
-For each deal:
-- **Target**: company name, description
-- **Acquirer**: name, strategic rationale
-- **Deal Value**: estimated or disclosed
-- **Multiple**: EV/Revenue or EV/EBITDA if available
-- **Implications for Maverix**: what this signals
-
+(Target · Acquirer · Deal Value · Multiple · Implications for Maverix)
 ## Valuation Trends
-Current market multiples for growth equity tech in Canada/Toronto.
-
 ## Competitor Activity
-Which PE/growth equity firms are most active and in what spaces.
-
 ## Strategic Implications for Maverix
-- Sectors heating up (act fast)
-- Sectors cooling (wait or avoid)
-- Specific opportunities this activity surfaces
-
-## Deal Sourcing Leads
-Based on this M&A activity, suggest 3-5 types of companies Maverix should be actively sourcing right now.
+## Deal Sourcing Leads (3-5 company types to source now)
 """
     return stream_gemini(prompt)
 
-
-@app.route("/api/morning-digest", methods=["POST"])
+@app.route('/api/morning-digest', methods=['POST'])
+@login_required
 def morning_digest():
     data = request.get_json()
-    date = data.get("date", "today")
-
-    prompt = f"""Generate a concise daily morning digest for the Maverix Private Equity deal sourcing team for {date}.
-
-This digest should be scannable in under 5 minutes and cover everything an analyst needs to start their day.
-
-Structure as follows:
-
+    date = data.get('date', 'today')
+    pipeline_ctx = get_pipeline_context()
+    prompt = f"""Generate a concise daily morning digest for the Maverix PE deal sourcing team for {date}.
+{pipeline_ctx}
 # 🌅 Maverix Morning Digest — {date}
 
-## Market Pulse (2-min read)
-Key overnight/morning market signals relevant to growth equity tech investing (TSX tech, NASDAQ, relevant indices, CAD/USD).
+## Market Pulse
+Key signals: TSX tech, NASDAQ, CAD/USD, sentiment.
 
 ## 🔥 Hot Sectors Today
-Top 3 sectors showing momentum right now with one-line rationale each.
+Top 3 with one-line rationale each.
 
-## 📊 M&A & Deal Flow (Yesterday/This Week)
-3-5 most relevant deals or rumors in Toronto/Canadian tech growth equity space.
+## 📊 M&A & Deal Flow
+3-5 most relevant deals or rumors in Toronto/Canadian tech.
 
 ## 💡 Company Spotlight
-One emerging company worth researching today — brief profile and why it's interesting for Maverix.
+One emerging company worth researching today.
 
 ## 📰 Must-Read News
-Top 3-4 headlines most relevant to PE deal sourcing in Canadian tech (with brief impact notes).
+Top 3-4 headlines relevant to PE deal sourcing in Canadian tech.
 
 ## 🎯 Today's Sourcing Priorities
-3 actionable items for the deal sourcing team today.
+3 actionable items for the team, referencing active pipeline where relevant.
 
 ## 📅 Week Ahead
-Key events, earnings, or announcements to watch this week that affect deal sourcing.
+Key events, earnings, or announcements to watch.
 
 ---
-*Generated by Maverix AI Deal Sourcing Assistant*
+*Maverix AI Intelligence Platform*
 """
     return stream_gemini(prompt)
 
-
-@app.route("/api/quick-screen", methods=["POST"])
+@app.route('/api/quick-screen', methods=['POST'])
+@login_required
 def quick_screen():
     data = request.get_json()
-    company_name = data.get("company_name", "").strip()
-    description = data.get("description", "").strip()
-
+    company_name = data.get('company_name', '').strip()
+    description  = data.get('description', '').strip()
     if not company_name:
-        return jsonify({"error": "Company name required"}), 400
-
-    prompt = f"""Perform a rapid investment screening for this company:
+        return jsonify({'error': 'Company name required'}), 400
+    prompt = f"""Rapid investment screening:
 
 **Company:** {company_name}
-**Description:** {description if description else "No description provided — use your knowledge if available."}
-
-Provide a 60-second screening assessment:
+**Description:** {description or 'No description — use available knowledge.'}
 
 ## ⚡ Quick Screen: {company_name}
 
 **Pass / Pass with Concerns / Fail**
 
-### Why (2-3 bullet points max)
+### Why (2-3 bullets max)
 
 ### Maverix Fit Score: X/10
-(Based on: Toronto/Canada nexus, growth equity stage, technology focus, team quality signals)
+(Toronto/Canada nexus · growth equity stage · technology focus · team signals)
 
-### Key Questions to Answer Before Proceeding
-(Top 3 diligence questions)
+### Key Diligence Questions (top 3)
 
-### Comparable Companies / Transactions
-(2-3 relevant comps)
+### Comparable Companies / Transactions (2-3 comps)
 
-### Recommended Next Step
-(One sentence action)
+### Recommended Next Step (one sentence)
 """
     return stream_gemini(prompt)
 
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080              , debug=True)
+if __name__ == '__main__':
+    init_db()
+    app.run(host='0.0.0.0', port=8080, debug=True)

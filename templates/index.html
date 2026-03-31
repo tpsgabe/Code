@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Maverix PE — Intelligence Platform</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -102,12 +103,13 @@
       </div>
       <div class="topbar-right">
         <div class="topbar-user">
-          <div class="user-avatar">JR</div>
+          <div class="user-avatar">{{ user_init }}</div>
           <div class="user-info">
-            <span class="user-name">John Ruffolo</span>
-            <span class="user-role">Managing Partner</span>
+            <span class="user-name">{{ user_name }}</span>
+            <span class="user-role">{{ user_role }}</span>
           </div>
         </div>
+        <a href="/logout" class="logout-btn" title="Sign out">&#x21A9;</a>
       </div>
     </header>
 
@@ -126,8 +128,8 @@
           </div>
           <div class="stat-card">
             <div class="stat-label">Active Deal Pipeline</div>
-            <div class="stat-value">14</div>
-            <div class="stat-delta up">↑ 3 new this week</div>
+            <div class="stat-value" id="stat-active-deals">—</div>
+            <div class="stat-delta up" id="stat-active-delta">Loading...</div>
           </div>
           <div class="stat-card">
             <div class="stat-label">Portfolio Companies</div>
@@ -337,6 +339,17 @@
               </div>
             </div>
 
+            <!-- Live Pipeline Summary -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Live Pipeline</h3>
+                <span class="panel-tag" id="dash-pipeline-tag">Loading…</span>
+              </div>
+              <div id="dash-pipeline-list" class="deal-list">
+                <div style="padding:1rem;color:var(--text-muted);font-size:.85rem">Loading pipeline…</div>
+              </div>
+            </div>
+
             <!-- Upcoming Events -->
             <div class="panel">
               <div class="panel-header">
@@ -381,13 +394,12 @@
       <!-- ══ DEAL PIPELINE ══════════════════════════════════ -->
       <section class="tab-panel" id="tab-pipeline">
         <div class="pipeline-header-row">
-          <div class="pipeline-stats">
-            <span>14 Active Deals</span>
+          <div class="pipeline-stats" id="pipeline-stats">
+            <span id="count-total">— deals</span>
             <span>·</span>
-            <span>$2.1B Total Pipeline Value</span>
-            <span>·</span>
-            <span>Avg. Time in Pipeline: 47 days</span>
+            <span>Active Pipeline</span>
           </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddDeal()">+ Add Deal</button>
         </div>
         <div class="pipeline-board">
 
@@ -395,184 +407,112 @@
             <div class="pipeline-col-header">
               <span class="pipeline-stage-dot dot-sourcing"></span>
               Sourcing
-              <span class="pipeline-count">5</span>
+              <span class="pipeline-count" id="count-sourcing">0</span>
             </div>
-            <div class="pipeline-cards">
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">Northstar Compliance</span>
-                  <span class="pc-sector">RegTech</span>
-                </div>
-                <div class="pc-meta">$18–25M target · Series A</div>
-                <div class="pc-owner">SA · Added Mar 28</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">Luminary Robotics</span>
-                  <span class="pc-sector">Industrial AI</span>
-                </div>
-                <div class="pc-meta">$30–40M target · Series B</div>
-                <div class="pc-owner">GR · Added Mar 25</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">TrueData Inc.</span>
-                  <span class="pc-sector">Data Infrastructure</span>
-                </div>
-                <div class="pc-meta">$50M target · Growth</div>
-                <div class="pc-owner">MK · Added Mar 22</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">Stealth Fintech Co.</span>
-                  <span class="pc-sector">B2B Payments</span>
-                </div>
-                <div class="pc-meta">Est. $20–30M · Series A</div>
-                <div class="pc-owner">JR · Added Mar 20</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">GreenTrace Analytics</span>
-                  <span class="pc-sector">CleanTech / ESG</span>
-                </div>
-                <div class="pc-meta">$15M target · Series A</div>
-                <div class="pc-owner">SA · Added Mar 18</div>
-              </div>
-            </div>
+            <div class="pipeline-cards sortable-list" id="col-sourcing"></div>
           </div>
 
           <div class="pipeline-col">
             <div class="pipeline-col-header">
               <span class="pipeline-stage-dot dot-screen"></span>
               Screening
-              <span class="pipeline-count">4</span>
+              <span class="pipeline-count" id="count-screening">0</span>
             </div>
-            <div class="pipeline-cards">
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">PayLink Solutions</span>
-                  <span class="pc-sector">Fintech</span>
-                </div>
-                <div class="pc-meta">$28M · Series A</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:60%"></div></div>
-                <div class="pc-owner">GR · IC Apr 8</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">Axiom Security</span>
-                  <span class="pc-sector">Cybersecurity</span>
-                </div>
-                <div class="pc-meta">$35M · Series B</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:45%"></div></div>
-                <div class="pc-owner">MK · Mgmt call Apr 5</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">SupplyBridge AI</span>
-                  <span class="pc-sector">Supply Chain</span>
-                </div>
-                <div class="pc-meta">$22M · Series A</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:35%"></div></div>
-                <div class="pc-owner">SA · Model review</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">HRFlow Technologies</span>
-                  <span class="pc-sector">HR Tech</span>
-                </div>
-                <div class="pc-meta">$18M · Series A</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:25%"></div></div>
-                <div class="pc-owner">JR · Initial screen</div>
-              </div>
-            </div>
+            <div class="pipeline-cards sortable-list" id="col-screening"></div>
           </div>
 
           <div class="pipeline-col">
             <div class="pipeline-col-header">
               <span class="pipeline-stage-dot dot-diligence"></span>
               Diligence
-              <span class="pipeline-count">3</span>
+              <span class="pipeline-count" id="count-diligence">0</span>
             </div>
-            <div class="pipeline-cards">
-              <div class="pipeline-card hot">
-                <div class="pc-hot-badge">Priority</div>
-                <div class="pc-top">
-                  <span class="pc-name">MedRecord AI</span>
-                  <span class="pc-sector">HealthTech</span>
-                </div>
-                <div class="pc-meta">$62M · Series B</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:80%"></div></div>
-                <div class="pc-checklist">
-                  <span class="check done">✓ Financial Model</span>
-                  <span class="check done">✓ Legal Review</span>
-                  <span class="check done">✓ Tech DD</span>
-                  <span class="check pending">○ Customer Refs</span>
-                  <span class="check pending">○ Final IC</span>
-                </div>
-                <div class="pc-owner">JR · IC Mar 31</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">FleetEdge Systems</span>
-                  <span class="pc-sector">Fleet / IoT</span>
-                </div>
-                <div class="pc-meta">$40M · Series B</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:55%"></div></div>
-                <div class="pc-checklist">
-                  <span class="check done">✓ Financial Model</span>
-                  <span class="check done">✓ Tech DD</span>
-                  <span class="check pending">○ Legal Review</span>
-                  <span class="check pending">○ Customer Refs</span>
-                </div>
-                <div class="pc-owner">MK · Target Apr 14</div>
-              </div>
-              <div class="pipeline-card">
-                <div class="pc-top">
-                  <span class="pc-name">Quiltt Financial</span>
-                  <span class="pc-sector">Open Banking</span>
-                </div>
-                <div class="pc-meta">$30M · Series A</div>
-                <div class="pc-bar-wrap"><div class="pc-bar" style="width:40%"></div></div>
-                <div class="pc-checklist">
-                  <span class="check done">✓ Financial Model</span>
-                  <span class="check pending">○ Tech DD</span>
-                  <span class="check pending">○ Legal Review</span>
-                </div>
-                <div class="pc-owner">GR · Target Apr 21</div>
-              </div>
-            </div>
+            <div class="pipeline-cards sortable-list" id="col-diligence"></div>
           </div>
 
           <div class="pipeline-col">
             <div class="pipeline-col-header">
               <span class="pipeline-stage-dot dot-closed"></span>
-              Closed / Passed
-              <span class="pipeline-count">2</span>
+              Closed
+              <span class="pipeline-count" id="count-closed">0</span>
             </div>
-            <div class="pipeline-cards">
-              <div class="pipeline-card closed">
-                <div class="pc-closed-badge invested">✓ Invested</div>
-                <div class="pc-top">
-                  <span class="pc-name">Vantage AI</span>
-                  <span class="pc-sector">AI / Analytics</span>
-                </div>
-                <div class="pc-meta">$25M · Closed Feb 2026</div>
-                <div class="pc-owner">Fund III · 5.8x target</div>
-              </div>
-              <div class="pipeline-card closed">
-                <div class="pc-closed-badge passed">✗ Passed</div>
-                <div class="pc-top">
-                  <span class="pc-name">Blockform Inc.</span>
-                  <span class="pc-sector">Web3 / Infra</span>
-                </div>
-                <div class="pc-meta">$50M · Valuation concern</div>
-                <div class="pc-owner">Passed Mar 12 · GR</div>
-              </div>
-            </div>
+            <div class="pipeline-cards sortable-list" id="col-closed"></div>
           </div>
 
         </div>
       </section>
+
+      <!-- ══ ADD / EDIT DEAL MODAL ══════════════════════════ -->
+      <div class="modal-overlay hidden" id="deal-modal" onclick="closeModalOutside(event)">
+        <div class="modal">
+          <div class="modal-header">
+            <h3 id="modal-title">Add New Deal</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="modal-deal-id" value="">
+            <div class="modal-grid">
+              <div class="modal-field">
+                <label>Company Name *</label>
+                <input type="text" id="modal-company" placeholder="e.g. Acme AI Inc." />
+              </div>
+              <div class="modal-field">
+                <label>Sector *</label>
+                <input type="text" id="modal-sector" placeholder="e.g. FinTech, HealthTech, AI/ML" />
+              </div>
+              <div class="modal-field">
+                <label>Target Amount</label>
+                <input type="text" id="modal-amount" placeholder="e.g. $25M" />
+              </div>
+              <div class="modal-field">
+                <label>Round Type</label>
+                <select id="modal-round">
+                  <option value="">— Select —</option>
+                  <option>Series A</option>
+                  <option>Series B</option>
+                  <option>Series C</option>
+                  <option>Growth</option>
+                  <option>Seed</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label>Stage *</label>
+                <select id="modal-stage">
+                  <option value="sourcing">Sourcing</option>
+                  <option value="screening">Screening</option>
+                  <option value="diligence">Diligence</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label>Outcome (if closed)</label>
+                <select id="modal-outcome">
+                  <option value="">— N/A —</option>
+                  <option value="invested">Invested</option>
+                  <option value="passed">Passed</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label>Owner</label>
+                <select id="modal-owner">
+                  <option value="JR">JR — John Ruffolo</option>
+                  <option value="SA">SA — Sarah Andrews</option>
+                  <option value="MK">MK — Mike Kim</option>
+                  <option value="GR">GR — Greg Russell</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-field" style="margin-top:.75rem">
+              <label>Notes</label>
+              <textarea id="modal-notes" rows="2" placeholder="Sourcing notes, next steps, context…"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modal-save-btn" onclick="saveDeal()">Save Deal</button>
+          </div>
+        </div>
+      </div>
 
       <!-- ══ PORTFOLIO ══════════════════════════════════════ -->
       <section class="tab-panel" id="tab-portfolio">
